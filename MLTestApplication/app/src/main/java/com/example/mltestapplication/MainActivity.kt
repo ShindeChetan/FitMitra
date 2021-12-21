@@ -8,22 +8,18 @@ import android.util.Size
 import androidx.core.content.ContextCompat
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.view.video.Metadata
-import androidx.camera.view.video.OutputFileOptions
-import androidx.core.view.size
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.LifecycleOwner
 import com.example.mltestapplication.databinding.ActivityMainBinding
-import com.example.mltestapplication.utils.Draw
+import com.example.mltestapplication.new.DrawExercise
+import com.example.mltestapplication.new.ExerciseType
 import com.google.android.gms.tasks.Task
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.pose.Pose
 import com.google.mlkit.vision.pose.PoseDetection
 import com.google.mlkit.vision.pose.PoseDetector
-import com.google.mlkit.vision.pose.PoseLandmark
 import com.google.mlkit.vision.pose.defaults.PoseDetectorOptions
-import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(){
 
@@ -55,6 +51,7 @@ class MainActivity : AppCompatActivity(){
 
 
         poseDetector = PoseDetection.getClient(poseDetectorOptions)
+
     }
 
     @SuppressLint("UnsafeOptInUsageError")
@@ -65,7 +62,7 @@ class MainActivity : AppCompatActivity(){
 
         //defining the camera, the prerequisites before opening the camera
         val cameraSelector = CameraSelector.Builder()
-            .requireLensFacing(CameraSelector.LENS_FACING_FRONT)
+            .requireLensFacing(CameraSelector.LENS_FACING_BACK)
             .build()
         preview.setSurfaceProvider(binding.previewView.surfaceProvider)
 
@@ -83,6 +80,7 @@ class MainActivity : AppCompatActivity(){
 
             if(image != null){
                 val processImage = InputImage.fromMediaImage(image, rotationDegrees)
+                var element : DrawExercise
                 val result : Task<Pose> = poseDetector
                         .process(processImage)
                     .addOnSuccessListener { pose ->
@@ -90,7 +88,7 @@ class MainActivity : AppCompatActivity(){
                         Log.d("CALLED", "Called inside poseDetector.onSuccessListener")
                         if (binding.parentLayout.childCount > 1) binding.parentLayout.removeViews( 1,
                             binding.parentLayout.childCount - 1)
-                            val element = Draw(context=this, pose)
+                            element =DrawExercise(ExerciseType.DumbellCurl_Type,context=this, pose)
                             binding.parentLayout.addView(element)
                         imageProxy.close()
                     }.addOnFailureListener {
