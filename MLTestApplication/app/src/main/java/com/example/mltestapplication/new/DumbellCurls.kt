@@ -9,7 +9,7 @@ import com.google.mlkit.vision.pose.Pose
 import com.google.mlkit.vision.pose.PoseLandmark
 import kotlin.math.log
 
-class DumbellCurls(context: Context, val poseInput: Pose) : View(context),Exercise {
+class DumbellCurls(context: Context, val poseInput: Pose, var isActive :Boolean) : View(context),Exercise {
 
     var isLeft : Boolean = false
     override val type: ExerciseType = ExerciseType.DumbellCurl_Type
@@ -21,15 +21,22 @@ class DumbellCurls(context: Context, val poseInput: Pose) : View(context),Exerci
     private var shoulderAngle : Float = 0f
     var errorText: MutableList<String> = MutableList<String>(0){""}
 
+    //temporary parameters, these will be entered by the user in future
+//    Maximum number of reps in a set
+    var maxReps = 12
+//    Maximum number of sets in total
+    var maxSets = 3
+
+
+
     var exception = false
     init {
-        init()
+//        if(isActive)
+            init()
     }
     fun init(){
         try {
-        isLeft = poseInput.getPoseLandmark(PoseLandmark.LEFT_WRIST).position.x <= poseInput.getPoseLandmark(
-            PoseLandmark.LEFT_ELBOW
-        ).position.x
+        checkElbowPosition()
         if (isLeft){
             jointsToDisplay = mutableMapOf(
                 "SHOULDER" to poseInput.getPoseLandmark(PoseLandmark.LEFT_SHOULDER).position,
@@ -74,10 +81,19 @@ class DumbellCurls(context: Context, val poseInput: Pose) : View(context),Exerci
     //two booleans used to set if last sequence was down-up , up-down
         var downUp = false
         var upDown = false
+    //
+    var isFinished = false
     }
 
     override fun drawing(canvas: Canvas?):Canvas {
-        if(!exception){
+        if(setCount>=maxSets){
+            isActive=false
+            isFinished = true
+        }
+
+//          if(!exception && isActive){
+            if(!exception){
+            init()
             giveReps()
             giveRepPosition()
             giveErrorText()
@@ -89,6 +105,10 @@ class DumbellCurls(context: Context, val poseInput: Pose) : View(context),Exerci
             }
         }
         return canvas!!
+    }
+
+    override fun giveIsFinished(): Boolean {
+        return isFinished
     }
 //return reps count
 
@@ -104,6 +124,10 @@ class DumbellCurls(context: Context, val poseInput: Pose) : View(context),Exerci
             upDown = true
         }
         lastRepPosition = currentRepPosition
+        if(repCount>maxReps){
+            ++setCount
+            repCount=0
+        }
         return repCount
     }
     
@@ -119,25 +143,38 @@ class DumbellCurls(context: Context, val poseInput: Pose) : View(context),Exerci
     }
 
     private fun giveErrorText(): MutableList<String>{
+        errorText.clear()
         if (elbowAngle<30){
             errorText.add("Contracting Biceps Too much")
-        }else if(elbowAngle>160){
+        }
+        if(elbowAngle>160){
             errorText.add("Extending elbow too much")
         }
-        else{
-            errorText.clear()
+        if(shoulderAngle>10){
+            errorText.add("Elbow to forward")
         }
         return errorText
     }
     private fun giveRedJoints(): MutableMap<String, PointF>{
+        redJointsMap.clear()
         if (elbowAngle<30){
             redJointsMap.put("ELBOW",jointsToDisplay["ELBOW"]!!)
-        }else if(elbowAngle>135){
+        }
+        if(elbowAngle>135){
             redJointsMap.put("ELBOW",jointsToDisplay["ELBOW"]!!)
         }
-        else{
-            redJointsMap.clear()
+        if(shoulderAngle>10){
+            redJointsMap.put("SHOULDER",jointsToDisplay["SHOULDER"]!!)
+            redJointsMap.put("ELBOW",jointsToDisplay["ELBOW"]!!)
+
         }
         return  redJointsMap
     }
+
+    private fun checkElbowPosition(){
+        isLeft = poseInput.getPoseLandmark(PoseLandmark.LEFT_WRIST).position.x <= poseInput.getPoseLandmark(
+            PoseLandmark.LEFT_ELBOW
+        ).position.x
+    }
+
 }
