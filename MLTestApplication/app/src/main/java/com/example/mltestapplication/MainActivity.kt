@@ -54,6 +54,8 @@ class MainActivity : AppCompatActivity(){
             bindPreview(cameraProvider = cameraProvider)
         }, ContextCompat.getMainExecutor(this))
 
+
+
 //        val localModel = LocalModel.Builder()
 //            .setAbsoluteFilePath("pose_detection.tflite")
 //            .build()
