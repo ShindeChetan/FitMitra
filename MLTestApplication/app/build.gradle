@@ -32,14 +32,14 @@ android {
         jvmTarget = '1.8'
 
     }
-    aaptOptions {
-        noCompress "tflite"
-    }
     buildFeatures{
         viewBinding = true
     }
     dataBinding{
         enabled = true
+    }
+    androidResources {
+        noCompress 'tflite'
     }
 }
 

@@ -4,9 +4,9 @@ import android.content.Context
 import com.google.mlkit.vision.pose.Pose
 
 class Factory {
-    fun getExercise(exType:ExerciseType,context: Context,pose: Pose) : Exercise? {
+    fun getExercise(exType:ExerciseType,context: Context,pose: Pose,isActive: Boolean) : Exercise? {
         return when(exType){
-            ExerciseType.DumbellCurl_Type -> DumbellCurls(context,pose)
+            ExerciseType.DumbellCurl_Type -> DumbellCurls(context,pose,isActive)
             else -> null
         }
     }
